@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import clsx from 'clsx';
 
 import { Select } from 'src/ui/select';
@@ -18,6 +18,7 @@ import {
 
 import styles from './ArticleParamsForm.module.scss';
 import { RadioGroup } from 'src/ui/radio-group';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 
 type ArticleParamsFormProps = {
 	articleParams: (options: ArticleStateType) => void;
@@ -40,6 +41,7 @@ export const ArticleParamsForm = ({
 		setOpen(!open);
 	};
 	const formStylle = clsx(styles.container, { [styles.container_open]: open });
+	const ref = useRef<HTMLDivElement>(null);
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -53,18 +55,25 @@ export const ArticleParamsForm = ({
 	};
 	const handleReset = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		articleParams({
-			fontFamilyOption: defaultArticleState.fontFamilyOption,
-			fontSizeOption: defaultArticleState.fontSizeOption,
-			fontColor: defaultArticleState.fontColor,
-			backgroundColor: defaultArticleState.backgroundColor,
-			contentWidth: defaultArticleState.contentWidth,
-		});
+
+		setFontSize(defaultArticleState.fontSizeOption);
+		setFontFamily(defaultArticleState.fontFamilyOption);
+		setBackground(defaultArticleState.backgroundColor);
+		setWidthArr(defaultArticleState.contentWidth);
+		setFontColor(defaultArticleState.fontColor);
+
+		articleParams(defaultArticleState);
 	};
+
+	useOutsideClickClose({
+		isOpen: open,
+		onChange: setOpen,
+		rootRef: ref,
+	});
 	return (
 		<>
 			<ArrowButton isOpen={open} onClick={toggleArrowButton} />
-			<aside className={formStylle}>
+			<aside ref={ref} className={formStylle}>
 				<form
 					className={styles.form}
 					onSubmit={handleSubmit}
