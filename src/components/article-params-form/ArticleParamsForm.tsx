@@ -7,6 +7,7 @@ import { Text } from 'src/ui/text';
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 import {
+	OptionType,
 	fontFamilyOptions,
 	fontSizeOptions,
 	defaultArticleState,
@@ -27,52 +28,43 @@ type ArticleParamsFormProps = {
 export const ArticleParamsForm = ({
 	articleParams,
 }: ArticleParamsFormProps) => {
-	const [open, setOpen] = useState(false);
-	const [fontFamily, setFontFamily] = useState(
-		defaultArticleState.fontFamilyOption
-	);
-	const [fontSize, setFontSize] = useState(defaultArticleState.fontSizeOption);
-	const [fontColor, setFontColor] = useState(defaultArticleState.fontColor);
-	const [background, setBackground] = useState(
-		defaultArticleState.backgroundColor
-	);
-	const [WidthArr, setWidthArr] = useState(defaultArticleState.contentWidth);
+	const [isOpen, setOpen] = useState(false);
+	const [articleParamsState, setArticleParamsState] =
+		useState(defaultArticleState);
 	const toggleArrowButton = () => {
-		setOpen(!open);
+		setOpen(!isOpen);
 	};
-	const formStylle = clsx(styles.container, { [styles.container_open]: open });
+	const formStylle = clsx(styles.container, {
+		[styles.container_open]: isOpen,
+	});
 	const ref = useRef<HTMLDivElement>(null);
+
+	const handleOnChange = (field: keyof ArticleStateType) => {
+		return (value: OptionType) => {
+			setArticleParamsState((prevState) => ({ ...prevState, [field]: value }));
+		};
+	};
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		articleParams({
-			fontFamilyOption: fontFamily,
-			fontSizeOption: fontSize,
-			fontColor: fontColor,
-			backgroundColor: background,
-			contentWidth: WidthArr,
-		});
+		articleParams(articleParamsState);
 	};
 	const handleReset = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		setFontSize(defaultArticleState.fontSizeOption);
-		setFontFamily(defaultArticleState.fontFamilyOption);
-		setBackground(defaultArticleState.backgroundColor);
-		setWidthArr(defaultArticleState.contentWidth);
-		setFontColor(defaultArticleState.fontColor);
+		setArticleParamsState(defaultArticleState);
 
 		articleParams(defaultArticleState);
 	};
 
 	useOutsideClickClose({
-		isOpen: open,
+		isOpen: isOpen,
 		onChange: setOpen,
 		rootRef: ref,
 	});
 	return (
 		<>
-			<ArrowButton isOpen={open} onClick={toggleArrowButton} />
+			<ArrowButton isOpen={isOpen} onClick={toggleArrowButton} />
 			<aside ref={ref} className={formStylle}>
 				<form
 					className={styles.form}
@@ -83,23 +75,23 @@ export const ArticleParamsForm = ({
 					</Text>
 
 					<Select
-						selected={fontFamily}
-						onChange={setFontFamily}
+						selected={articleParamsState.fontFamilyOption}
+						onChange={handleOnChange('fontFamilyOption')}
 						options={fontFamilyOptions}
 						title='Шрифт'
 					/>
 
 					<RadioGroup
 						name='radio'
-						onChange={setFontSize}
-						selected={fontSize}
+						onChange={handleOnChange('fontSizeOption')}
+						selected={articleParamsState.fontSizeOption}
 						options={fontSizeOptions}
 						title='размер шрифта'
 					/>
 
 					<Select
-						onChange={setFontColor}
-						selected={fontColor}
+						onChange={handleOnChange('fontColor')}
+						selected={articleParamsState.fontColor}
 						options={fontColors}
 						title='цвет шрифта'
 					/>
@@ -107,15 +99,15 @@ export const ArticleParamsForm = ({
 					<Separator />
 
 					<Select
-						selected={background}
-						onChange={setBackground}
+						selected={articleParamsState.backgroundColor}
+						onChange={handleOnChange('backgroundColor')}
 						options={backgroundColors}
 						title='цвет фона'
 					/>
 
 					<Select
-						selected={WidthArr}
-						onChange={setWidthArr}
+						selected={articleParamsState.contentWidth}
+						onChange={handleOnChange('contentWidth')}
 						options={contentWidthArr}
 						title='ширина контента'
 					/>
